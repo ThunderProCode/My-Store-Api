@@ -3,7 +3,7 @@ import productsRouter from './products.routes'
 import categoriesRouter from './categories.routes';
 import usersRouter from './users.routes';
 
-const routerApi = (app) => {
+const routerApi = (app:any) => {
   const router = Router();
   app.use('/api/v1', router);
   router.use('/products', productsRouter);

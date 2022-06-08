@@ -1,35 +1,52 @@
-import { Router } from 'express';
-import faker from 'faker';
-import routerApi from '.';
+import { Router, Request, Response, NextFunction } from 'express';
 const productsRouter = Router();
+import  ProductsService from '../services/Products/products.service';
 
-productsRouter.get('/', (req,res) => {
-  const products = [];
-  const { size } = req.query;
-  const limit = size || 10;
-  for (let index = 0; index < limit; index++) {
-    products.push({
-      name: faker.commerce.productName(),
-      price: parseInt(faker.commerce.price(), 10),
-      image: faker.image.imageUrl(),
-    })
+const service = new ProductsService();
+
+// Get All products
+productsRouter.get('/', async (_req: Request,res:Response) => {
+  const products = await service.find();
+  res.status(200).json(products);
+});
+
+// Get a product by id
+productsRouter.get('/:id', async (req: Request,res: Response,
+  next:NextFunction) => {
+  try {
+    const { id } = req.params;
+    const product = await service.findOne(id);
+    res.json(product);
+  } catch (error) {
+      next(error);
   }
-  res.json(products);
 })
 
-productsRouter.get('/filter', (req,res) => {
-  res.send('Yo soy un filter');
-})
+// Create new Product
+productsRouter.post('/', async (req: Request,res: Response) => {
+  const body = req.body;
+  const newProduct = await service.create(body);
+  res.status(201).json(newProduct);
+});
 
-productsRouter.get('/:id', (req,res) => {
+// Update a Product
+productsRouter.patch('/:id', async (req: Request,res: Response,
+  next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const body = req.body;
+    const product = await service.update(id,body);
+    res.json(product);
+  } catch (error:any) {
+    next(error);
+  }
+});
+
+// Delete a Product
+productsRouter.delete('/:id', async (req: Request,res:Response) => {
   const { id } = req.params;
-  res.json({
-    id,
-    name: 'Product 2',
-    price: 2000
-  })
-})
-
-
+  const product = await service.delete(id);
+  res.json(product);
+});
 
 export default productsRouter;
